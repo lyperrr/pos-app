@@ -196,7 +196,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         {item.badgeAlert && (
                           <Badge
                             variant="destructive"
-                            className="ml-auto text-[10px] px-1.5 py-0 font-semibold"
+                            className={cn("ml-auto text-[10px] px-1.5 py-0 font-semibold", isActive ? "text-primary-foreground bg-destructive hover:bg-destructive/80" : "")}
                           >
                             {item.badgeAlert}
                           </Badge>
