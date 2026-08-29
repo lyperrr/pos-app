@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 
 export function PosSkeleton() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto animate-pulse">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
       {/* Product Catalog Grid Skeleton (2 cols on desktop) */}
       <div className="lg:col-span-2 space-y-4">
         {/* Search & Filter Bar */}
