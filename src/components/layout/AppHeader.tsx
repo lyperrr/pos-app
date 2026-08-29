@@ -30,7 +30,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ currentTitle = "Dashboard Laporan" }: AppHeaderProps) {
-  const { user, logout, loginAsMockRole } = useAuth()
+  const { user, logout, loginAsMockRole, isApiConnected } = useAuth()
   const navigate = useNavigate()
 
   const currentRole = (user?.role?.name as DevRole) || "Owner"
@@ -68,8 +68,20 @@ export function AppHeader({ currentTitle = "Dashboard Laporan" }: AppHeaderProps
         </Breadcrumb>
       </div>
 
-      {/* Right section: Developer Role Switcher, Active Outlet, Alerts & Avatar Dropdown */}
-      <div className="flex items-center gap-3">
+      {/* Right section: API Status, Developer Role Switcher, Active Outlet & Avatar */}
+      <div className="flex items-center gap-2.5">
+        {/* Backend API Connection Status Badge */}
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border bg-background shadow-2xs">
+          <span
+            className={`size-2 rounded-full ${
+              isApiConnected ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+            }`}
+          />
+          <span className="text-muted-foreground">
+            {isApiConnected ? "API Sanctum Connected" : "Dev Mock Mode"}
+          </span>
+        </div>
+
         {/* Developer Role Switcher Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger className="inline-flex items-center h-8 gap-1.5 px-2.5 rounded-lg border border-primary/40 bg-background text-xs font-semibold hover:bg-muted cursor-pointer transition-colors outline-none">

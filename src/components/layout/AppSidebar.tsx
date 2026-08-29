@@ -142,8 +142,14 @@ const navGroups: NavGroup[] = [
         requiredPermission: "role.manage",
       },
       {
-        title: "Pengaturan Outlet",
+        title: "Cabang Outlet",
         icon: Store,
+        url: ROUTES.OUTLETS,
+        requiredPermission: "setting.manage",
+      },
+      {
+        title: "Pengaturan System",
+        icon: Building2,
         url: ROUTES.SETTINGS,
         requiredPermission: "setting.manage",
       },
