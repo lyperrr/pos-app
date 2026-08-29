@@ -6,28 +6,50 @@ import { Label } from "@/components/ui/label"
 import { ROUTES } from "@/constants/routes"
 import { ArrowRight, CheckCircle2, Eye, EyeOff } from "lucide-react"
 
+import { useAuth } from "@/context/AuthContext"
+
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const { registerOwner } = useAuth()
   const [businessName, setBusinessName] = React.useState("")
   const [fullName, setFullName] = React.useState("")
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [confirmPassword, setConfirmPassword] = React.useState("")
   const [showPassword, setShowPassword] = React.useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [errorMsg, setErrorMsg] = React.useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMsg("")
+
+    if (password.length < 8) {
+      setErrorMsg("Kata sandi wajib berisi minimal 8 karakter.")
+      return
+    }
 
     if (password !== confirmPassword) {
       setErrorMsg("Konfirmasi kata sandi tidak cocok. Silakan periksa kembali.")
       return
     }
 
-    // Simulated tenant registration
-    navigate(ROUTES.LOGIN)
+    try {
+      await registerOwner({
+        business_name: businessName,
+        business_type: "retail",
+        full_name: fullName,
+        email,
+        password,
+        outlet_name: `Outlet ${businessName}`,
+      })
+      navigate(ROUTES.DASHBOARD)
+    } catch (err: any) {
+      if (err?.message) {
+        setErrorMsg(err.message)
+      } else {
+        navigate(ROUTES.DASHBOARD)
+      }
+    }
   }
 
   return (
@@ -101,7 +123,10 @@ export default function RegisterPage() {
 
               {/* Password Field with Hide/Show Toggle */}
               <div className="space-y-1">
-                <Label htmlFor="password" className="text-xs font-bold text-slate-700">Kata Sandi</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-xs font-bold text-slate-700">Kata Sandi</Label>
+                  <span className="text-[10px] text-slate-400 font-medium">Min. 8 karakter</span>
+                </div>
                 <div className="relative">
                   <Input
                     id="password"
@@ -109,6 +134,7 @@ export default function RegisterPage() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    minLength={8}
                     className="h-10 rounded-xl border-slate-200 px-4 pr-10 text-sm font-medium focus-visible:ring-2 focus-visible:ring-primary"
                     required
                   />
@@ -128,19 +154,21 @@ export default function RegisterPage() {
                 <div className="relative">
                   <Input
                     id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    minLength={8}
                     className="h-10 rounded-xl border-slate-200 px-4 pr-10 text-sm font-medium focus-visible:ring-2 focus-visible:ring-primary"
                     required
                   />
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    onClick={() => setShowPassword(!showPassword)}
+                    title={showPassword ? "Sembunyikan Kata Sandi" : "Tampilkan Kata Sandi"}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
-                    {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
                 </div>
               </div>

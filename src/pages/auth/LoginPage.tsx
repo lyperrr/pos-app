@@ -157,9 +157,12 @@ export default function LoginPage() {
                     Ingat Saya
                   </label>
                 </div>
-                <span className="text-xs font-bold text-primary hover:underline cursor-pointer">
+                <Link
+                  to={ROUTES.FORGOT_PASSWORD}
+                  className="text-xs font-bold text-primary hover:underline cursor-pointer"
+                >
                   Lupa Kata Sandi?
-                </span>
+                </Link>
               </div>
 
               {/* Log In Button */}
