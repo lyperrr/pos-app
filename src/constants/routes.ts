@@ -2,6 +2,8 @@ export const ROUTES = {
   // Public / Auth routes
   LOGIN: '/login',
   REGISTER: '/register-owner',
+  FORGOT_PASSWORD: '/forgot-password',
+  RESET_PASSWORD: '/reset-password',
 
   // Protected application routes
   DASHBOARD: '/dashboard',
@@ -13,6 +15,7 @@ export const ROUTES = {
   REPORTS: '/reports',
   USERS: '/users',
   ROLES: '/roles',
+  OUTLETS: '/outlets',
   SETTINGS: '/settings',
   PROFILE: '/profile',
 

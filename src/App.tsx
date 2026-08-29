@@ -15,6 +15,8 @@ import { ROUTES } from "@/constants/routes"
 // Lazy loaded page components
 const LoginPage = React.lazy(() => import("@/pages/auth/LoginPage"))
 const RegisterPage = React.lazy(() => import("@/pages/auth/RegisterPage"))
+const ForgotPasswordPage = React.lazy(() => import("@/pages/auth/ForgotPasswordPage"))
+const ResetPasswordPage = React.lazy(() => import("@/pages/auth/ResetPasswordPage"))
 const DashboardPage = React.lazy(() => import("@/pages/dashboard/DashboardPage"))
 const PosPage = React.lazy(() => import("@/pages/pos/PosPage"))
 const ProductListPage = React.lazy(() => import("@/pages/products/ProductListPage"))
@@ -24,6 +26,7 @@ const TransactionHistoryPage = React.lazy(() => import("@/pages/transactions/Tra
 const SalesReportPage = React.lazy(() => import("@/pages/reports/SalesReportPage"))
 const UserManagementPage = React.lazy(() => import("@/pages/users/UserManagementPage"))
 const RoleManagementPage = React.lazy(() => import("@/pages/roles/RoleManagementPage"))
+const OutletManagementPage = React.lazy(() => import("@/pages/outlets/OutletManagementPage"))
 const OutletSettingsPage = React.lazy(() => import("@/pages/settings/OutletSettingsPage"))
 const ProfilePage = React.lazy(() => import("@/pages/settings/ProfilePage"))
 const NotFoundPage = React.lazy(() => import("@/pages/errors/NotFoundPage"))
@@ -47,6 +50,22 @@ const router = createBrowserRouter([
         element: (
           <React.Suspense fallback={<PageSkeleton />}>
             <RegisterPage />
+          </React.Suspense>
+        ),
+      },
+      {
+        path: ROUTES.FORGOT_PASSWORD,
+        element: (
+          <React.Suspense fallback={<PageSkeleton />}>
+            <ForgotPasswordPage />
+          </React.Suspense>
+        ),
+      },
+      {
+        path: ROUTES.RESET_PASSWORD,
+        element: (
+          <React.Suspense fallback={<PageSkeleton />}>
+            <ResetPasswordPage />
           </React.Suspense>
         ),
       },
@@ -146,6 +165,16 @@ const router = createBrowserRouter([
               <ProtectedRoute requiredPermission="role.manage">
                 <React.Suspense fallback={<PageSkeleton />}>
                   <RoleManagementPage />
+                </React.Suspense>
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: ROUTES.OUTLETS,
+            element: (
+              <ProtectedRoute requiredPermission="setting.manage">
+                <React.Suspense fallback={<PageSkeleton />}>
+                  <OutletManagementPage />
                 </React.Suspense>
               </ProtectedRoute>
             ),

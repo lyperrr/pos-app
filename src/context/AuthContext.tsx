@@ -1,6 +1,6 @@
 import * as React from 'react'
 import authService from '@/services/authService'
-import type { LoginDTO, User } from '@/types'
+import type { LoginDTO, RegisterOwnerDTO, User } from '@/types'
 
 export type DevRole = 'Owner' | 'Manager' | 'Cashier'
 
@@ -103,7 +103,9 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   isMockMode: boolean
+  isApiConnected: boolean
   login: (credentials: LoginDTO) => Promise<void>
+  registerOwner: (data: RegisterOwnerDTO) => Promise<void>
   loginAsMockRole: (role: DevRole) => void
   logout: () => Promise<void>
   hasPermission: (permissionCode: string) => boolean
@@ -116,16 +118,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = React.useState<string | null>(() => authService.getToken())
   const [isLoading, setIsLoading] = React.useState<boolean>(true)
   const [isMockMode, setIsMockMode] = React.useState<boolean>(false)
+  const [isApiConnected, setIsApiConnected] = React.useState<boolean>(false)
 
-  // Initialize session on mount (Backend token check or Developer mock role)
+  // Initialize session on mount (Backend token check or Developer mock role fallback)
   React.useEffect(() => {
     async function initAuth() {
-      // Check if developer mock role stored in localStorage
+      // Check if developer mock role explicitly active in localStorage
       const storedMockRole = localStorage.getItem(MOCK_ROLE_STORAGE_KEY) as DevRole | null
       if (storedMockRole && MOCK_USERS[storedMockRole]) {
         setUser(MOCK_USERS[storedMockRole])
         setToken(`mock-dev-token-${storedMockRole.toLowerCase()}`)
         setIsMockMode(true)
+        setIsApiConnected(false)
         setIsLoading(false)
         return
       }
@@ -143,11 +147,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (response.success && response.data) {
           setUser(response.data)
           setIsMockMode(false)
+          setIsApiConnected(true)
         } else {
           loginAsMockRoleInternal('Owner')
         }
       } catch (error) {
-        console.warn('Backend API unavailable. Falling back to Developer Mock session:', error)
+        console.warn('Backend API server unavailable. Falling back to Developer Mock session:', error)
         loginAsMockRoleInternal('Owner')
       } finally {
         setIsLoading(false)
@@ -165,6 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(mockToken)
     setUser(mockUser)
     setIsMockMode(true)
+    setIsApiConnected(false)
   }
 
   const loginAsMockRole = (role: DevRole) => {
@@ -182,16 +188,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setToken(response.data.token)
         setUser(response.data.user)
         setIsMockMode(false)
+        setIsApiConnected(true)
       } else {
-        throw new Error(response.message || 'Login failed')
+        throw new Error(response.message || 'Login gagal')
       }
-    } catch (err) {
-      console.warn('Backend login failed or server unreachable. Using Developer Mock session for email:', credentials.email)
+    } catch (err: any) {
+      console.warn('Backend API login error. Using Developer Mock session for email:', credentials.email, err)
       // Infer role from email or fallback to Owner
       let roleToUse: DevRole = 'Owner'
       if (credentials.email.includes('manager')) roleToUse = 'Manager'
       if (credentials.email.includes('cashier')) roleToUse = 'Cashier'
       loginAsMockRoleInternal(roleToUse)
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const registerOwner = async (data: RegisterOwnerDTO) => {
+    setIsLoading(true)
+    try {
+      const response = await authService.registerOwner(data)
+      if (response.success && response.data) {
+        localStorage.removeItem(MOCK_ROLE_STORAGE_KEY)
+        setToken(response.data.token)
+        setUser(response.data.user)
+        setIsMockMode(false)
+        setIsApiConnected(true)
+      } else {
+        throw new Error(response.message || 'Registrasi gagal')
+      }
+    } catch (err: any) {
+      console.warn('Backend API registration error. Falling back to dev owner session:', err)
+      loginAsMockRoleInternal('Owner')
+      throw err
     } finally {
       setIsLoading(false)
     }
@@ -203,12 +233,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!isMockMode) {
         await authService.logout()
       }
+    } catch (e) {
+      console.warn('Logout error ignored:', e)
     } finally {
       localStorage.removeItem(MOCK_ROLE_STORAGE_KEY)
       authService.clearToken()
       setToken(null)
       setUser(null)
       setIsMockMode(false)
+      setIsApiConnected(false)
       setIsLoading(false)
     }
   }
@@ -230,7 +263,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: Boolean(token && user),
     isLoading,
     isMockMode,
+    isApiConnected,
     login,
+    registerOwner,
     loginAsMockRole,
     logout,
     hasPermission,
