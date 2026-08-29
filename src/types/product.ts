@@ -4,10 +4,16 @@ export interface Product {
   category: string
   category_label: string
   price: number
-  image: string
-  is_special: boolean
-  variant_id: string | null
+  cost_price?: number
+  image?: string
+  is_special?: boolean
+  variant_id?: string | null
   barcode?: string | null
+  sku?: string | null
+  stock?: number
+  min_stock?: number
+  unit?: string
+  is_active?: boolean
 }
 
 export interface ProductFilterParams {
@@ -20,12 +26,25 @@ export interface ProductFilterParams {
 }
 
 export interface CreateProductDTO {
-  tenant_id: string
-  outlet_id: string
+  tenant_id?: string
+  outlet_id?: string
   category_id?: string
   name: string
   image?: string
   barcode?: string
-  base_price: number
+  sku?: string
+  price: number
+  base_price?: number
+  cost_price?: number
+  stock?: number
+  min_stock?: number
   is_special?: boolean
+}
+
+export interface CartItem {
+  product_id: string
+  variant_id?: string | null
+  product_name: string
+  unit_price: number
+  quantity: number
 }

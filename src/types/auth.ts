@@ -12,6 +12,22 @@ export interface Outlet {
   address?: string | null
   phone?: string | null
   is_active: boolean
+  created_at?: string
+  deleted_at?: string | null
+}
+
+export interface CreateOutletDTO {
+  name: string
+  address?: string | null
+  phone?: string | null
+  is_active?: boolean
+}
+
+export interface UpdateOutletDTO {
+  name?: string
+  address?: string | null
+  phone?: string | null
+  is_active?: boolean
 }
 
 export interface Permission {

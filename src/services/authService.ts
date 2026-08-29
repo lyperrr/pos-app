@@ -27,6 +27,30 @@ export const authService = {
   },
 
   /**
+   * Send password reset link email.
+   */
+  async forgotPassword(email: string): Promise<ApiResponse<any>> {
+    const response = await apiClient.post<ApiResponse<any>>('/auth/forgot-password', { email })
+    return response.data
+  },
+
+  /**
+   * Verify password reset token from email link.
+   */
+  async verifyResetToken(email: string, token: string): Promise<ApiResponse<any>> {
+    const response = await apiClient.post<ApiResponse<any>>('/auth/verify-reset-token', { email, token })
+    return response.data
+  },
+
+  /**
+   * Reset user password with token.
+   */
+  async resetPassword(data: { email: string; token: string; password: string }): Promise<ApiResponse<any>> {
+    const response = await apiClient.post<ApiResponse<any>>('/auth/reset-password', data)
+    return response.data
+  },
+
+  /**
    * Logout user and remove token.
    */
   async logout(): Promise<ApiResponse<null>> {
