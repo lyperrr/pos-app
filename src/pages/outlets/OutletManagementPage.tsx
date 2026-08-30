@@ -2,6 +2,7 @@ import * as React from "react"
 import { useAuth } from "@/context/AuthContext"
 import { outletService } from "@/services/outletService"
 import type { Outlet } from "@/types"
+import { sanitizeErrorMessage } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -58,7 +59,7 @@ export default function OutletManagementPage() {
         setOutlets(res.data)
       }
     } catch (err: any) {
-      setErrorMsg(err?.message || "Gagal memuat daftar outlet cabang.")
+      setErrorMsg(sanitizeErrorMessage(err?.message, "Gagal memuat daftar outlet cabang. Silakan coba beberapa saat lagi."))
     } finally {
       setIsLoading(false)
     }
@@ -121,7 +122,7 @@ export default function OutletManagementPage() {
       setIsModalOpen(false)
       fetchOutlets(search)
     } catch (err: any) {
-      setModalError(err?.message || "Gagal menyimpan informasi outlet.")
+      setModalError(sanitizeErrorMessage(err?.message, "Gagal menyimpan informasi outlet."))
     } finally {
       setIsSubmitting(false)
     }
@@ -137,7 +138,7 @@ export default function OutletManagementPage() {
       setSuccessMsg(`Outlet "${outlet.name}" telah dinonaktifkan (soft delete).`)
       fetchOutlets(search)
     } catch (err: any) {
-      setErrorMsg(err?.message || "Gagal menonaktifkan outlet.")
+      setErrorMsg(sanitizeErrorMessage(err?.message, "Gagal menonaktifkan outlet."))
     }
   }
 
@@ -149,7 +150,7 @@ export default function OutletManagementPage() {
       setSuccessMsg(`Outlet "${outlet.name}" berhasil dipulihkan kembali.`)
       fetchOutlets(search)
     } catch (err: any) {
-      setErrorMsg(err?.message || "Gagal memulihkan outlet.")
+      setErrorMsg(sanitizeErrorMessage(err?.message, "Gagal memulihkan outlet."))
     }
   }
 
@@ -212,8 +213,8 @@ export default function OutletManagementPage() {
       {errorMsg && (
         <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2.5 text-xs font-bold">
-            <ShieldAlert className="size-4 text-rose-600" />
-            <span>{errorMsg}</span>
+            <ShieldAlert className="size-4 text-rose-600 shrink-0" />
+            <span>{sanitizeErrorMessage(errorMsg)}</span>
           </div>
           <button onClick={() => setErrorMsg("")} className="text-rose-700 hover:text-rose-900 cursor-pointer">
             <X className="size-4" />
@@ -396,7 +397,7 @@ export default function OutletManagementPage() {
             {/* Modal Error */}
             {modalError && (
               <div className="p-3 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl">
-                {modalError}
+                {sanitizeErrorMessage(modalError)}
               </div>
             )}
 
