@@ -20,6 +20,7 @@
 11. [TypeScript & Tipe Data](#11-typescript--tipe-data)
 12. [Detail-Detail Kecil UI & UX Best Practices](#12-detail-detail-kecil-ui--ux-best-practices)
 13. [Struktur File & Penamaan](#13-struktur-file--penamaan)
+14. [Error Handling & Pesan Error Ramah Pengguna](#14-error-handling--pesan-error-ramah-pengguna)
 
 ---
 
@@ -478,6 +479,94 @@ src/
 
 ---
 
+## 14. Error Handling & Pesan Error Ramah Pengguna
+
+**Aturan:** **DILARANG KERAS** menampilkan pesan error teknis mentah dari backend (seperti `SQLSTATE[...]`, `Connection refused`, stack trace, query SQL, atau error internal server 500) secara langsung di UI/layar pengguna.
+
+Pesan error teknis tidak dipahami oleh pengguna biasa, merusak tampilan/pengalaman pengguna, dan berpotensi menimbulkan celah keamanan (*information disclosure*).
+
+### Prinsip Utama Error Handling
+
+1. **User-Friendly Message:** Semua pesan error di UI wajib menggunakan Bahasa Indonesia yang santun, jelas, dan mudah dimengerti oleh pengguna non-teknis.
+2. **Sanitasi Pesan Error:** Frontend (`apiClient` interceptor / error helper) dan Backend (Laravel Exception Handler) **WAJIB** menyaring pesan error teknis sebelum dirender di UI.
+3. **Log Teknis Hanya untuk Developer:** Detail error teknis (SQLSTATE, stack trace, error code) hanya boleh dicatat di `console.error()` atau log server (`laravel.log`) untuk debugging developer.
+
+### Contoh Penanganan Error di Frontend
+
+#### Benar — Menggunakan Helper Sanitasi Pesan Error (`getErrorMessage`)
+
+```tsx
+// Helper penyaring error teknis menjadi pesan ramah pengguna
+export function getErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    // 1. Error Jaringan / Server Down / Connection Refused
+    if (!error.response || error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+      return 'Gagal terhubung ke server. Silakan periksa koneksi internet Anda atau coba beberapa saat lagi.'
+    }
+
+    const status = error.response.status
+    const data = error.response.data
+    const rawMessage = data?.message || ''
+
+    // 2. Deteksi & Filter jika backend me-return SQL / Technical Error / Error 500
+    if (
+      rawMessage.includes('SQLSTATE') ||
+      rawMessage.includes('Connection refused') ||
+      rawMessage.includes('Syntax error') ||
+      status === 500
+    ) {
+      // JANGAN tampilkan rawMessage! Ganti dengan pesan umum yang santun
+      return 'Terjadi kendala pada sistem server. Silakan coba beberapa saat lagi.'
+    }
+
+    // 3. Error Validasi / Business Logic yang aman dari backend (misal 422, 400, 403, 404)
+    if (rawMessage) {
+      return rawMessage
+    }
+  }
+
+  return 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi.'
+}
+```
+
+#### Penggunaan pada Komponen UI / Alert Banner
+
+```tsx
+// ✅ BENAR — Selalu saring pesan error sebelum ditampilkan ke user
+{isError && (
+  <Alert variant="destructive">
+    <AlertDescription>
+      {getErrorMessage(error)}
+    </AlertDescription>
+  </Alert>
+)}
+```
+
+#### Salah — Menampilkan raw error / message mentah dari backend
+
+```tsx
+// ❌ DILARANG — Teks error mentah backend (seperti `SQLSTATE[HY000]...`) langsung ditampilkan di UI
+{isError && (
+  <Alert variant="destructive">
+    <AlertDescription>
+      {error?.response?.data?.message || error.message}
+    </AlertDescription>
+  </Alert>
+)}
+```
+
+### Pemetaan Pesan Error yang Direkomendasikan
+
+| Kondisi Error | Pesan yang DILARANG di UI | Pesan Wajib yang Ditampilkan ke User |
+|---|---|---|
+| Database Down / Connection Refused | `SQLSTATE[HY000] [2002] Connection refused...` | *"Gagal terhubung ke server. Silakan coba beberapa saat lagi."* |
+| Internal Server Error (500) | `Call to a member function... on null` / Stack trace | *"Terjadi kendala pada server. Tim kami sedang menanganinya."* |
+| Network / Connection Offline | `Network Error` / `ERR_CONNECTION_REFUSED` | *"Koneksi terputus. Pastikan perangkat Anda terhubung ke internet."* |
+| Data Tidak Ditemukan (404) | `No query results for model [App\Models\Outlet]` | *"Data yang Anda cari tidak ditemukan."* |
+| Akses Ditolak (403) | `This action is unauthorized.` | *"Anda tidak memiliki akses untuk melakukan tindakan ini."* |
+
+---
+
 ## Ringkasan Cepat (Cheatsheet)
 
 | Aturan | Lakukan | Jangan |
@@ -492,6 +581,7 @@ src/
 | **Styling** | Class tambahan hanya untuk layout/spacing | Override style default komponen UI |
 | **Data Fetching** | `useQuery` / `useMutation` dari TanStack Query | `useState` + `useEffect` untuk fetch |
 | **Validasi** | Frontend UX + **Backend wajib** (Laravel Form Request) | Validasi hanya di frontend |
+| **Error Handling** | **Saring pesan ramah user (`getErrorMessage`)** | Tampilkan raw error (`SQLSTATE`, stack trace, SQL) ke UI |
 | **API calls** | Melalui service di `src/services/` | Panggil `apiClient` dari komponen |
 | **Tipe Data** | Selalu bertipe, tidak `any` | `any` atau `@ts-ignore` |
 | **Detail UI/UX** | Format Rp `toLocaleString()`, truncate teks, state disabled | Teks terpotong jelek, tombol tanpa feedback |
