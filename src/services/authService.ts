@@ -71,18 +71,25 @@ export const authService = {
   },
 
   /**
-   * LocalStorage Token Helper methods.
+   * Token Helper methods (supports rememberMe persistent localStorage vs session-only sessionStorage).
    */
   getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY)
+    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY)
   },
 
-  setToken(token: string): void {
-    localStorage.setItem(TOKEN_KEY, token)
+  setToken(token: string, remember: boolean = true): void {
+    if (remember) {
+      localStorage.setItem(TOKEN_KEY, token)
+      sessionStorage.removeItem(TOKEN_KEY)
+    } else {
+      sessionStorage.setItem(TOKEN_KEY, token)
+      localStorage.removeItem(TOKEN_KEY)
+    }
   },
 
   clearToken(): void {
     localStorage.removeItem(TOKEN_KEY)
+    sessionStorage.removeItem(TOKEN_KEY)
   },
 }
 

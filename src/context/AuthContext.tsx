@@ -104,7 +104,7 @@ interface AuthContextType {
   isLoading: boolean
   isMockMode: boolean
   isApiConnected: boolean
-  login: (credentials: LoginDTO) => Promise<void>
+  login: (credentials: LoginDTO, remember?: boolean) => Promise<void>
   registerOwner: (data: RegisterOwnerDTO) => Promise<void>
   loginAsMockRole: (role: DevRole) => void
   logout: () => Promise<void>
@@ -166,7 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const mockUser = MOCK_USERS[role]
     const mockToken = `mock-dev-token-${role.toLowerCase()}`
     localStorage.setItem(MOCK_ROLE_STORAGE_KEY, role)
-    authService.setToken(mockToken)
+    authService.setToken(mockToken, true)
     setToken(mockToken)
     setUser(mockUser)
     setIsMockMode(true)
@@ -179,12 +179,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false)
   }
 
-  const login = async (credentials: LoginDTO) => {
+  const login = async (credentials: LoginDTO, remember: boolean = true) => {
     setIsLoading(true)
     try {
       const response = await authService.login(credentials)
       if (response.success && response.data) {
         localStorage.removeItem(MOCK_ROLE_STORAGE_KEY)
+        authService.setToken(response.data.token, remember)
         setToken(response.data.token)
         setUser(response.data.user)
         setIsMockMode(false)

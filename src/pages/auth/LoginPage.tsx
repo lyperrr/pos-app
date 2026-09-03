@@ -21,17 +21,29 @@ import {
 } from "lucide-react"
 
 export default function LoginPage() {
-  const [email, setEmail] = React.useState("owner@nirapos.id")
+  const [email, setEmail] = React.useState(() => {
+    return localStorage.getItem("nira_remembered_email") || "owner@nirapos.id"
+  })
   const [password, setPassword] = React.useState("password")
   const [showPassword, setShowPassword] = React.useState(false)
-  const [rememberMe, setRememberMe] = React.useState(true)
+  const [rememberMe, setRememberMe] = React.useState(() => {
+    return localStorage.getItem("nira_remember_me") !== "false"
+  })
   const { login, loginAsMockRole, isLoading } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await login({ email, password })
+      if (rememberMe) {
+        localStorage.setItem("nira_remembered_email", email.trim())
+        localStorage.setItem("nira_remember_me", "true")
+      } else {
+        localStorage.removeItem("nira_remembered_email")
+        localStorage.setItem("nira_remember_me", "false")
+      }
+
+      await login({ email, password }, rememberMe)
       showToast.success("Berhasil masuk ke akun Anda!")
       navigate(ROUTES.DASHBOARD)
     } catch (err: unknown) {
@@ -41,6 +53,10 @@ export default function LoginPage() {
   }
 
   const handleDevQuickLogin = (role: DevRole) => {
+    if (rememberMe) {
+      localStorage.setItem("nira_remembered_email", email.trim())
+      localStorage.setItem("nira_remember_me", "true")
+    }
     loginAsMockRole(role)
     showToast.success(`Masuk dalam Mode Developer sebagai ${role}`)
     navigate(ROUTES.DASHBOARD)
