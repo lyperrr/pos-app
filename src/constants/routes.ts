@@ -9,6 +9,7 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
   POS: '/pos',
   PRODUCTS: '/products',
+  ADD_PRODUCT: '/products/create',
   CATEGORIES: '/categories',
   STOCK: '/stock',
   TRANSACTIONS: '/transactions',

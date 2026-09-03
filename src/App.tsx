@@ -20,6 +20,7 @@ const ResetPasswordPage = React.lazy(() => import("@/pages/auth/ResetPasswordPag
 const DashboardPage = React.lazy(() => import("@/pages/dashboard/DashboardPage"))
 const PosPage = React.lazy(() => import("@/pages/pos/PosPage"))
 const ProductListPage = React.lazy(() => import("@/pages/products/ProductListPage"))
+const CreateProductPage = React.lazy(() => import("@/pages/products/CreateProductPage"))
 const CategoryListPage = React.lazy(() => import("@/pages/categories/CategoryListPage"))
 const StockManagementPage = React.lazy(() => import("@/pages/stock/StockManagementPage"))
 const TransactionHistoryPage = React.lazy(() => import("@/pages/transactions/TransactionHistoryPage"))
@@ -105,6 +106,16 @@ const router = createBrowserRouter([
               <ProtectedRoute requiredPermission="product.view">
                 <React.Suspense fallback={<TableSkeleton />}>
                   <ProductListPage />
+                </React.Suspense>
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: ROUTES.ADD_PRODUCT,
+            element: (
+              <ProtectedRoute requiredPermission="product.view">
+                <React.Suspense fallback={<PageSkeleton />}>
+                  <CreateProductPage />
                 </React.Suspense>
               </ProtectedRoute>
             ),

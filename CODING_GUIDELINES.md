@@ -147,28 +147,73 @@ const [page, setPage] = useState(1)
 
 ## 3. Penggunaan Komponen UI & Standard Icon (Lucide Icons)
 
-**Aturan UI Component:** Selalu cek `src/components/ui/` **terlebih dahulu** sebelum membuat komponen baru. Komponen shadcn/ui yang tersedia wajib digunakan.
+**ATURAN MUTLAK UI COMPONENT:** **SEBELUM MEMBUAT ATAU ME-RENDER ELEMENT UI APAPUN, WAJIB CEK DIREKTORI KOMPONEN UI (`src/components/ui/`) TERLEBIH DAHULU.**
+
+1. **Wajib Selalu Menggunakan UI Components yang Ada:** Apabila komponen UI standar sudah tersedia (contoh: `<Table>`, `<TableHeader>`, `<TableRow>`, `<TableCell>`, `<TableBody>`, `<Select>`, `<SelectContent>`, `<SelectItem>`, `<Card>`, `<Badge>`, `<Button>`, `<Input>`, `<Checkbox>`, `<Empty>`, `<Skeleton>`, dsb.), **WAJIB SELALU IMPORT DAN GUNAKAN KOMPONEN TERSEBUT**.
+2. **DILARANG KERAS Menulis Tag HTML Mentah:** Dilarang menggunakan tag HTML mentah seperti raw `<table>`, `<thead>`, `<tbody>`, `<tr>`, `<th>`, `<td>`, raw `<select>`, atau raw `<input type="checkbox">` jika komponen UI standarnya sudah ada di `src/components/ui/`.
+3. **Komponen Manual Hanya jika Belum Ada:** Elemen HTML manual HANYA BOLEH dibuat jika komponen tersebut memang belum tersedia di `src/components/ui/`.
 
 **Aturan Icon:** **WAJIB SELALU** menggunakan icon dari `lucide-react` (Lucide Icons). Dilarang menginstall library icon lain (seperti FontAwesome, React Icons, Heroicons) atau membuat SVG manual inline kecuali sangat terpaksa.
 
-### Benar — Import dari `lucide-react`
+### Benar — Menggunakan Komponen UI Standar (`src/components/ui/`) & Lucide Icons
 
 ```tsx
-import { Plus, Search, Trash2, Package, Filter, CheckCircle2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Plus, Search, Trash2, Package } from 'lucide-react'
 
-<Button className="gap-2">
-  <Plus className="size-4" /> Tambah Produk
-</Button>
+export function ExampleView() {
+  return (
+    <div>
+      {/* ✅ Gunakan Select dari UI Components */}
+      <Select value={category} onValueChange={setCategory}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Pilih Kategori" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Semua Kategori</SelectItem>
+          <SelectItem value="retail">Retail</SelectItem>
+        </SelectContent>
+      </Select>
+
+      {/* ✅ Gunakan Table dari UI Components */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nama Produk</TableHead>
+            <TableHead>Harga</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>Kopi Bali</TableCell>
+            <TableCell>Rp 45.000</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
 ```
 
-### Salah — Menggunakan library icon lain atau SVG inline
+### Salah — Menggunakan Tag HTML Mentah padahal Komponen UI Sudah Ada
 
 ```tsx
-// ❌ JANGAN pakai library lain
-import { FaPlus } from 'react-icons/fa'
+// ❌ DILARANG — Menggunakan raw html table jika <Table> sudah ada
+<table>
+  <thead>
+    <tr><th>Nama</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Kopi Bali</td></tr>
+  </tbody>
+</table>
 
-// ❌ JANGAN buat SVG manual jika di Lucide sudah ada
-<svg viewBox="0 0 24 24">...</svg>
+// ❌ DILARANG — Menggunakan raw html <select> jika <Select> sudah ada
+<select value={category} onChange={(e) => setCategory(e.target.value)}>
+  <option value="all">Semua</option>
+</select>
 ```
 
 ### Daftar Komponen UI yang Tersedia (`src/components/ui/`)
@@ -177,15 +222,17 @@ import { FaPlus } from 'react-icons/fa'
 |---|---|---|
 | `<Button>` | `button.tsx` | Semua tombol aksi |
 | `<Input>` | `input.tsx` | Text input, search |
-| `<Select>` | `select.tsx` | Dropdown pilihan |
+| `<Select>` | `select.tsx` | Dropdown pilihan shadcn |
+| `<NativeSelect>` | `native-select.tsx` | Native select wrapper UI |
+| `<Table>`, `<TableHeader>`, `<TableRow>`, `<TableCell>` | `table.tsx` | Tabel data standar |
 | `<Combobox>` | `combobox.tsx` | Dropdown searchable |
-| `<Card>` | `card.tsx` | Container konten |
+| `<Card>`, `<CardHeader>`, `<CardContent>` | `card.tsx` | Container konten |
 | `<Badge>` | `badge.tsx` | Status/label |
+| `<Checkbox>` | `checkbox.tsx` | Checkbox pilihan |
 | `<Dialog>` | `dialog.tsx` | Modal dialog |
 | `<ConfirmationDialog>` | `confirmation-dialog.tsx` | Dialog konfirmasi hapus/aksi |
 | `<Skeleton>` | `skeleton.tsx` | Loading placeholder |
 | `<Pagination>` | `pagination.tsx` | Navigasi halaman |
-| `<Table>` | `table.tsx` | Tabel data |
 | `<Toast>` | `toast.tsx` | Notifikasi toast |
 | `<Field>` | `field.tsx` | Form field dengan label & error |
 | `<Empty>` | `empty.tsx` | State kosong/tidak ada data |
@@ -356,37 +403,58 @@ if (products.length === 0) return <div>Data tidak ada</div>
 
 ## 7. Styling — Jangan Override Kalau Tidak Perlu
 
-**Aturan:** Ketika menggunakan komponen UI di halaman/file lain, **jangan menambahkan class Tailwind** yang sudah menjadi default komponen tersebut atau yang tidak diperlukan.
+**Aturan:** Ketika menggunakan komponen UI dari `src/components/ui/` di halaman/file lain, **DILARANG KERAS** menambahkan class Tailwind yang redundant (seperti `rounded-xl`, `rounded-lg`, `h-10`, `text-sm`, `font-medium`, `font-bold`, `border-border`, `shadow-2xs`) yang **sudah menjadi style default bawaan komponen tersebut**, kecuali ada kebutuhan khusus untuk penyesuaian layout/spacing.
 
 ### Benar — Gunakan Komponen Apa Adanya
 
 ```tsx
-// Button sudah punya padding, height, dan font yang tepat.
-// Tidak perlu tambahkan px-4, py-2, h-10, dsb.
+// ✅ Button sudah memiliki default height, padding, font-size, dan rounded corner.
 <Button onClick={handleSubmit}>Simpan Produk</Button>
 
-// Tambahkan class HANYA jika memang diperlukan di konteks ini (misal: spacing layout)
-<Button variant="destructive" size="sm" className="gap-2">
-  <Trash2 className="size-4" /> Hapus
+// ✅ Input polos tanpa tambahan class redundant
+<Input placeholder="Cari..." value={search} onChange={(e) => setSearch(e.target.value)} />
+
+// ✅ SelectTrigger polos tanpa merubah height/font/border-radius default
+<SelectTrigger>
+  <SelectValue placeholder="Pilih Kategori" />
+</SelectTrigger>
+
+// ✅ Card polos tanpa menambahkan rounded-2xl / shadow-2xs / border-border manual
+<Card>
+  <CardHeader>
+    <CardTitle>Judul Card</CardTitle>
+  </CardHeader>
+</Card>
+
+// ✅ Tambahkan class HANYA untuk layout/spacing/positioning yang spesifik
+<Input className="pl-9" /> // pl-9 diperlukan karena ada icon di sebelah kiri
+<Button className="gap-2"> // gap-2 untuk spacing icon & label
+  <Plus className="size-4" /> Tambah
 </Button>
 ```
 
-### Salah — Override Style Default
+### Salah — Override Style Default dengan Class Redundant
 
 ```tsx
-// ❌ JANGAN — px-6, py-3, rounded-lg sudah ada di komponen Button
-<Button className="px-6 py-3 rounded-lg font-semibold w-full">Simpan</Button>
+// ❌ DILARANG — Input tidak perlu rounded-xl, h-10, text-sm, font-medium lagi!
+<Input className="rounded-xl h-10 text-sm font-medium pl-9" />
 
-// ❌ JANGAN — font-medium, text-sm sudah default di Input
-<Input className="font-medium text-sm border-gray-300 rounded-md" />
+// ❌ DILARANG — Button tidak perlu rounded-xl, font-bold, px-5 lagi!
+<Button className="rounded-xl font-bold px-5 gap-2">Tambah</Button>
+
+// ❌ DILARANG — SelectTrigger tidak perlu rounded-xl h-10 text-sm!
+<SelectTrigger className="rounded-xl h-10 text-sm">
+
+// ❌ DILARANG — Card sudah memiliki rounded-xl dan ring/border bawaan!
+<Card className="rounded-2xl border border-border shadow-2xs">
 ```
 
 ### Kapan Boleh Menambah Class
 
 Tambahkan class **hanya** jika:
-1. Mengubah layout (`w-full`, `flex-1`, `col-span-2`)
-2. Mengubah spacing antar elemen di layout tertentu (`mt-4`, `mr-2`, `gap-2`)
-3. Mengubah variant yang tidak tersedia via prop (kasus sangat jarang)
+1. Mengubah layout/ukuran kontainer (`w-full`, `w-48`, `flex-1`, `col-span-2`)
+2. Mengubah spacing antar elemen (`mt-4`, `gap-2`, `p-4`)
+3. Menyesuaikan posisi internal spesifik (misal: `pl-9` untuk input ber-ikon)
 
 ---
 
