@@ -67,16 +67,29 @@ export default function CreateProductPage() {
     loadCategories()
   }, [])
 
-  // Auto-generate SKU
+  // Auto-generate SKU using POS Industry Structured Standard ([CAT]-[INITIALS]-[RANDOM])
   const generateSku = () => {
-    const prefix = name ? name.substring(0, 3).toUpperCase() : "PRD"
+    const selectedCat = categories.find((c) => c.id === categoryId)
+    const catPrefix = selectedCat
+      ? selectedCat.name.replace(/[^A-Za-z]/g, "").substring(0, 3).toUpperCase()
+      : "GEN"
+
+    const cleanName = name.trim().toUpperCase()
+    const nameInitials = cleanName
+      ? cleanName
+          .split(/\s+/)
+          .map((w) => w[0])
+          .join("")
+          .substring(0, 4)
+      : "PRD"
+
     const random = Math.floor(1000 + Math.random() * 9000)
-    setSku(`${prefix}-${random}`)
+    setSku(`${catPrefix}-${nameInitials}-${random}`)
   }
 
-  // Auto-generate Barcode
+  // Auto-generate Barcode (GS1 Internal POS Retail Prefix 200)
   const generateBarcode = () => {
-    const random = "899" + Math.floor(100000000 + Math.random() * 900000000).toString()
+    const random = "200" + Math.floor(100000000 + Math.random() * 900000000).toString()
     setBarcode(random)
   }
 
@@ -98,36 +111,41 @@ export default function CreateProductPage() {
     return Object.keys(newErrors).length === 0
   }
 
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
 
     setIsSubmitting(true)
     setErrors({})
+    setErrorMessage(null)
+    setSuccessMessage(null)
+
     try {
-      await productService.createProduct({
+      const response = await productService.createProduct({
         name: name.trim(),
-        category_id: categoryId || undefined,
+        category_id: categoryId && categoryId !== "cat-all" ? categoryId : undefined,
         price: Number(price),
         cost_price: costPrice ? Number(costPrice) : undefined,
-        stock: stock ? Number(stock) : 0,
-        min_stock: minStock ? Number(minStock) : 5,
-        barcode: barcode || undefined,
-        sku: sku || undefined,
-        image: image || undefined,
+        stock: stock ? Number(stock) : undefined,
+        min_stock: minStock ? Number(minStock) : undefined,
+        barcode: barcode.trim() || undefined,
+        sku: sku.trim() || undefined,
+        image: image.trim() || undefined,
         is_special: false,
       })
 
-      setSuccessMessage("Produk berhasil ditambahkan ke katalog!")
-      setTimeout(() => {
-        navigate(ROUTES.PRODUCTS)
-      }, 1200)
+      if (response.success || response.data) {
+        setSuccessMessage("Produk berhasil ditambahkan ke katalog!")
+        setTimeout(() => {
+          navigate(ROUTES.PRODUCTS)
+        }, 1000)
+      }
     } catch (err: unknown) {
       console.error("Gagal menambah produk:", err)
-      setSuccessMessage("Produk berhasil disimpan!")
-      setTimeout(() => {
-        navigate(ROUTES.PRODUCTS)
-      }, 1200)
+      const msg = (err as { message?: string })?.message || "Gagal menyimpan produk ke backend API."
+      setErrorMessage(msg)
     } finally {
       setIsSubmitting(false)
     }
@@ -190,6 +208,13 @@ export default function CreateProductPage() {
         <div className="p-4 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-3 font-semibold text-sm animate-in fade-in">
           <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
           {successMessage}
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-3 font-semibold text-sm animate-in fade-in">
+          <PackagePlus className="size-5 text-destructive shrink-0" />
+          {errorMessage}
         </div>
       )}
 
@@ -372,7 +397,7 @@ export default function CreateProductPage() {
                 <div className="flex gap-2">
                   <Input
                     id="barcode-input"
-                    placeholder="Contoh: 8991001"
+                    placeholder="Contoh: 200849201948"
                     value={barcode}
                     onChange={(e) => setBarcode(e.target.value)}
                     className="font-mono"
@@ -388,6 +413,9 @@ export default function CreateProductPage() {
                     <Sparkles className="size-3.5 text-primary" /> Auto
                   </Button>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Pindai kemasan produk atau kosongkan untuk generate barcode 13-digit otomatis.
+                </p>
               </Field>
 
               <Field>
@@ -395,7 +423,7 @@ export default function CreateProductPage() {
                 <div className="flex gap-2">
                   <Input
                     id="sku-input"
-                    placeholder="Contoh: KOP-8921"
+                    placeholder="Contoh: BEV-KSG-847"
                     value={sku}
                     onChange={(e) => setSku(e.target.value)}
                     className="font-mono"
@@ -411,6 +439,9 @@ export default function CreateProductPage() {
                     <Hash className="size-3.5 text-primary" /> Auto
                   </Button>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Format POS: <code className="font-mono text-[10px] bg-muted px-1 py-0.5 rounded">KAT-INIT-XXXX</code>. Kosongkan jika ingin sistem menerbitkan SKU unik otomatis.
+                </p>
               </Field>
 
               <Field>

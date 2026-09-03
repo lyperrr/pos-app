@@ -106,7 +106,7 @@ export default function ProductListPage() {
         search: debouncedSearch || undefined,
         category_id: selectedCategory && selectedCategory !== "all" ? selectedCategory : undefined,
       })
-      if (response.success && response.data && response.data.length > 0) {
+      if (response.success && Array.isArray(response.data)) {
         setProducts(response.data)
       } else {
         setProducts(FALLBACK_PRODUCTS)
