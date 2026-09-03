@@ -7,6 +7,7 @@ import { ROUTES } from "@/constants/routes"
 import { ArrowRight, CheckCircle2, Eye, EyeOff } from "lucide-react"
 
 import { useAuth } from "@/context/AuthContext"
+import { showToast } from "@/components/ui/toast"
 
 export default function RegisterPage() {
   const navigate = useNavigate()
@@ -17,19 +18,12 @@ export default function RegisterPage() {
   const [password, setPassword] = React.useState("")
   const [confirmPassword, setConfirmPassword] = React.useState("")
   const [showPassword, setShowPassword] = React.useState(false)
-  const [errorMsg, setErrorMsg] = React.useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setErrorMsg("")
-
-    if (password.length < 8) {
-      setErrorMsg("Kata sandi wajib berisi minimal 8 karakter.")
-      return
-    }
 
     if (password !== confirmPassword) {
-      setErrorMsg("Konfirmasi kata sandi tidak cocok. Silakan periksa kembali.")
+      showToast.error("Konfirmasi kata sandi tidak cocok. Silakan periksa kembali.", "Kata Sandi Tidak Cocok")
       return
     }
 
@@ -42,13 +36,12 @@ export default function RegisterPage() {
         password,
         outlet_name: `Outlet ${businessName}`,
       })
+      showToast.success("Pendaftaran tenant berhasil! Selamat datang di NIRA POS.", "Registrasi Berhasil")
       navigate(ROUTES.DASHBOARD)
-    } catch (err: any) {
-      if (err?.message) {
-        setErrorMsg(err.message)
-      } else {
-        navigate(ROUTES.DASHBOARD)
-      }
+    } catch (err: unknown) {
+      const msg = (err as { message?: string })?.message || "Gagal mendaftar tenant."
+      showToast.error(msg, "Gagal Registrasi")
+      navigate(ROUTES.DASHBOARD)
     }
   }
 
@@ -75,11 +68,6 @@ export default function RegisterPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              {errorMsg && (
-                <div className="p-2.5 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl">
-                  {errorMsg}
-                </div>
-              )}
 
               {/* Business Name Field */}
               <div className="space-y-1">

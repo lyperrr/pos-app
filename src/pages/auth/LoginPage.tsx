@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { useAuth, type DevRole } from "@/context/AuthContext"
 import { ROUTES } from "@/constants/routes"
+import { showToast } from "@/components/ui/toast"
 import {
   Eye,
   EyeOff,
@@ -24,23 +25,24 @@ export default function LoginPage() {
   const [password, setPassword] = React.useState("password")
   const [showPassword, setShowPassword] = React.useState(false)
   const [rememberMe, setRememberMe] = React.useState(true)
-  const [errorMsg, setErrorMsg] = React.useState("")
   const { login, loginAsMockRole, isLoading } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setErrorMsg("")
     try {
       await login({ email, password })
+      showToast.success("Berhasil masuk ke akun Anda!")
       navigate(ROUTES.DASHBOARD)
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Gagal masuk. Silakan periksa kredensial Anda.")
+    } catch (err: unknown) {
+      const msg = (err as { message?: string })?.message || "Gagal masuk. Silakan periksa email & password Anda."
+      showToast.error(msg, "Gagal Masuk")
     }
   }
 
   const handleDevQuickLogin = (role: DevRole) => {
     loginAsMockRole(role)
+    showToast.success(`Masuk dalam Mode Developer sebagai ${role}`)
     navigate(ROUTES.DASHBOARD)
   }
 
@@ -98,11 +100,6 @@ export default function LoginPage() {
 
             {/* FORM */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {errorMsg && (
-                <div className="p-3 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl">
-                  {errorMsg}
-                </div>
-              )}
 
               {/* Email Input */}
               <div className="space-y-1.5">

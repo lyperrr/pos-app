@@ -17,6 +17,7 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ViewToggle, type ViewMode } from "@/components/ui/view-toggle"
+import { showToast } from "@/components/ui/toast"
 import {
   Dialog,
   DialogContent,
@@ -37,7 +38,6 @@ import {
   SearchX,
   Tag,
   Barcode,
-  CheckCircle2,
 } from "lucide-react"
 import { productService } from "@/services/productService"
 import { categoryService } from "@/services/categoryService"
@@ -74,7 +74,6 @@ export default function ProductListPage() {
   const [productToDelete, setProductToDelete] = React.useState<Product | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [selectedDetailProduct, setSelectedDetailProduct] = React.useState<Product | null>(null)
-  const [toastMessage, setToastMessage] = React.useState<string | null>(null)
 
   const handleViewChange = (mode: ViewMode) => {
     setViewMode(mode)
@@ -163,10 +162,10 @@ export default function ProductListPage() {
     try {
       await productService.deleteProduct(productToDelete.id)
       setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id))
-      showToast(`Produk "${productToDelete.name}" berhasil dihapus.`)
+      showToast.success(`Produk "${productToDelete.name}" berhasil dihapus.`)
     } catch {
       setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id))
-      showToast(`Produk "${productToDelete.name}" telah dihapus.`)
+      showToast.success(`Produk "${productToDelete.name}" telah dihapus.`)
     } finally {
       setIsDeleting(false)
       setProductToDelete(null)
@@ -182,12 +181,7 @@ export default function ProductListPage() {
       sku: product.sku ? `${product.sku}-COPY` : undefined,
     }
     setProducts((prev) => [duplicated, ...prev])
-    showToast(`Produk "${product.name}" berhasil diduplikasi.`)
-  }
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg)
-    setTimeout(() => setToastMessage(null), 3000)
+    showToast.success(`Produk "${product.name}" berhasil diduplikasi.`)
   }
 
   // Dynamic search placeholder based on active filters
@@ -221,13 +215,6 @@ export default function ProductListPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Toast Banner */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-slate-900 text-white shadow-2xl flex items-center gap-3 text-sm font-medium animate-in slide-in-from-bottom-5">
-          <CheckCircle2 className="size-5 text-emerald-400 shrink-0" />
-          {toastMessage}
-        </div>
-      )}
 
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

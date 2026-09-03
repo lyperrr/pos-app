@@ -17,11 +17,11 @@ import {
   Layers,
   Loader2,
   Sparkles,
-  CheckCircle2,
 } from "lucide-react"
 import { productService } from "@/services/productService"
 import { categoryService } from "@/services/categoryService"
 import { ROUTES } from "@/constants/routes"
+import { showToast } from "@/components/ui/toast"
 import type { Category } from "@/types"
 
 export default function CreateProductPage() {
@@ -45,7 +45,6 @@ export default function CreateProductPage() {
   const [isLoadingCategories, setIsLoadingCategories] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [errors, setErrors] = React.useState<Record<string, string>>({})
-  const [successMessage, setSuccessMessage] = React.useState<string | null>(null)
 
   // Fetch categories on mount
   React.useEffect(() => {
@@ -111,16 +110,12 @@ export default function CreateProductPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
 
     setIsSubmitting(true)
     setErrors({})
-    setErrorMessage(null)
-    setSuccessMessage(null)
 
     try {
       const response = await productService.createProduct({
@@ -137,15 +132,15 @@ export default function CreateProductPage() {
       })
 
       if (response.success || response.data) {
-        setSuccessMessage("Produk berhasil ditambahkan ke katalog!")
+        showToast.success("Produk berhasil ditambahkan ke katalog!", "Berhasil Ditambahkan")
         setTimeout(() => {
           navigate(ROUTES.PRODUCTS)
-        }, 1000)
+        }, 800)
       }
     } catch (err: unknown) {
       console.error("Gagal menambah produk:", err)
       const msg = (err as { message?: string })?.message || "Gagal menyimpan produk ke backend API."
-      setErrorMessage(msg)
+      showToast.error(msg, "Gagal Menyimpan")
     } finally {
       setIsSubmitting(false)
     }
@@ -203,20 +198,6 @@ export default function CreateProductPage() {
           </Button>
         </div>
       </div>
-
-      {successMessage && (
-        <div className="p-4 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-3 font-semibold text-sm animate-in fade-in">
-          <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
-          {successMessage}
-        </div>
-      )}
-
-      {errorMessage && (
-        <div className="p-4 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-3 font-semibold text-sm animate-in fade-in">
-          <PackagePlus className="size-5 text-destructive shrink-0" />
-          {errorMessage}
-        </div>
-      )}
 
       <form id="create-product-form" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2 Cols): Information, Pricing, & Stock */}

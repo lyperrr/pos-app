@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { Toast as ToastPrimitive } from "@base-ui/react/toast"
 
 import { cn } from "@/lib/utils"
@@ -133,68 +132,84 @@ function ToastClose({
 }
 
 function ToastIcon({ type }: { type: string | undefined }) {
-  let icon: React.ReactNode = null
-
   if (type === "success") {
-    icon = (
-      <CircleCheckIcon aria-hidden="true" />
+    return (
+      <span data-slot="toast-icon" className="shrink-0 text-white [&_svg]:size-5">
+        <CircleCheckIcon aria-hidden="true" />
+      </span>
     )
   }
 
   if (type === "info") {
-    icon = (
-      <InfoIcon aria-hidden="true" />
+    return (
+      <span data-slot="toast-icon" className="shrink-0 text-white [&_svg]:size-5">
+        <InfoIcon aria-hidden="true" />
+      </span>
     )
   }
 
   if (type === "warning") {
-    icon = (
-      <TriangleAlertIcon aria-hidden="true" />
+    return (
+      <span data-slot="toast-icon" className="shrink-0 text-slate-950 [&_svg]:size-5">
+        <TriangleAlertIcon aria-hidden="true" />
+      </span>
     )
   }
 
   if (type === "error") {
-    icon = (
-      <OctagonXIcon className="text-destructive" aria-hidden="true" />
+    return (
+      <span data-slot="toast-icon" className="shrink-0 text-white [&_svg]:size-5">
+        <OctagonXIcon aria-hidden="true" />
+      </span>
     )
   }
 
   if (type === "loading") {
-    icon = (
-      <Loader2Icon className="animate-spin" aria-hidden="true" />
+    return (
+      <span data-slot="toast-icon" className="shrink-0 text-muted-foreground [&_svg]:size-5">
+        <Loader2Icon className="animate-spin" aria-hidden="true" />
+      </span>
     )
   }
 
-  if (!icon) {
-    return null
-  }
-
-  return (
-    <span
-      data-slot="toast-icon"
-      className="shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4"
-    >
-      {icon}
-    </span>
-  )
+  return null
 }
 
 function ToastList() {
   const { toasts } = ToastPrimitive.useToastManager()
 
-  return toasts.map((toastItem) => (
-    <Toast key={toastItem.id} toast={toastItem}>
-      <ToastContent>
-        <ToastIcon type={toastItem.type} />
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <ToastTitle />
-          <ToastDescription />
-        </div>
-        <ToastAction />
-        <ToastClose />
-      </ToastContent>
-    </Toast>
-  ))
+  return toasts.map((toastItem) => {
+    const type = toastItem.type
+
+    let variantStyles = "bg-popover text-popover-foreground border-border"
+    if (type === "success") {
+      variantStyles =
+        "bg-emerald-600 text-white border-emerald-600 shadow-xl shadow-emerald-950/20 [&_[data-slot=toast-description]]:text-white/90 [&_[data-slot=toast-close]]:text-white/80 [&_[data-slot=toast-close]]:hover:text-white font-medium"
+    } else if (type === "error") {
+      variantStyles =
+        "bg-destructive text-white border-destructive shadow-xl shadow-destructive/20 [&_[data-slot=toast-description]]:text-white/90 [&_[data-slot=toast-close]]:text-white/80 [&_[data-slot=toast-close]]:hover:text-white font-medium"
+    } else if (type === "warning") {
+      variantStyles =
+        "bg-amber-500 text-slate-950 border-amber-500 shadow-xl shadow-amber-950/20 [&_[data-slot=toast-description]]:text-slate-900/90 [&_[data-slot=toast-close]]:text-slate-800 [&_[data-slot=toast-close]]:hover:text-slate-950 font-medium"
+    } else if (type === "info") {
+      variantStyles =
+        "bg-sky-600 text-white border-sky-600 shadow-xl shadow-sky-950/20 [&_[data-slot=toast-description]]:text-white/90 [&_[data-slot=toast-close]]:text-white/80 [&_[data-slot=toast-close]]:hover:text-white font-medium"
+    }
+
+    return (
+      <Toast key={toastItem.id} toast={toastItem} className={variantStyles}>
+        <ToastContent>
+          <ToastIcon type={type} />
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <ToastTitle />
+            <ToastDescription />
+          </div>
+          <ToastAction />
+          <ToastClose />
+        </ToastContent>
+      </Toast>
+    )
+  })
 }
 
 function Toaster({
@@ -216,6 +231,17 @@ function Toaster({
 
 const createToastManager = ToastPrimitive.createToastManager
 const useToastManager = ToastPrimitive.useToastManager
+
+export const showToast = {
+  success: (description: string, title?: string) =>
+    toast.add({ title, description, type: "success" }),
+  error: (description: string, title?: string) =>
+    toast.add({ title, description, type: "error" }),
+  warning: (description: string, title?: string) =>
+    toast.add({ title, description, type: "warning" }),
+  info: (description: string, title?: string) =>
+    toast.add({ title, description, type: "info" }),
+}
 
 export {
   Toaster,

@@ -11,6 +11,7 @@ import {
   PageSkeleton,
 } from "@/components/loading"
 import { ROUTES } from "@/constants/routes"
+import { Toaster } from "@/components/ui/toast"
 
 // Lazy loaded page components
 const LoginPage = React.lazy(() => import("@/pages/auth/LoginPage"))
@@ -233,6 +234,7 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <AuthProvider>
+      <Toaster />
       <RouterProvider router={router} />
     </AuthProvider>
   )
