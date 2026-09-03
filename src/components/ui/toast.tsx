@@ -110,7 +110,7 @@ function ToastAction({
 function ToastClose({
   className,
   children,
-  render = <Button variant="ghost" size="icon-sm" />,
+  render = <button type="button" />,
   ...props
 }: ToastPrimitive.Close.Props) {
   return (
@@ -119,13 +119,13 @@ function ToastClose({
       aria-label="Close toast"
       render={render}
       className={cn(
-        "relative shrink-0 text-muted-foreground after:absolute after:-inset-2 after:content-[''] hover:text-foreground",
+        "relative shrink-0 rounded-lg p-1.5 opacity-80 transition-all hover:opacity-100 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white/50",
         className
       )}
       {...props}
     >
       {children ?? (
-        <XIcon aria-hidden="true" />
+        <XIcon className="size-4" aria-hidden="true" />
       )}
     </ToastPrimitive.Close>
   )
@@ -184,16 +184,16 @@ function ToastList() {
     let variantStyles = "bg-popover text-popover-foreground border-border"
     if (type === "success") {
       variantStyles =
-        "bg-emerald-600 text-white border-emerald-600 shadow-xl shadow-emerald-950/20 [&_[data-slot=toast-description]]:text-white/90 [&_[data-slot=toast-close]]:text-white/80 [&_[data-slot=toast-close]]:hover:text-white font-medium"
+        "bg-emerald-600 text-white border-emerald-600 shadow-xl shadow-emerald-950/20 [&_[data-slot=toast-description]]:text-white/90 [&_[data-slot=toast-close]]:hover:bg-white/20 [&_[data-slot=toast-close]]:text-white font-medium"
     } else if (type === "error") {
       variantStyles =
-        "bg-destructive text-white border-destructive shadow-xl shadow-destructive/20 [&_[data-slot=toast-description]]:text-white/90 [&_[data-slot=toast-close]]:text-white/80 [&_[data-slot=toast-close]]:hover:text-white font-medium"
+        "bg-destructive text-white border-destructive shadow-xl shadow-destructive/20 [&_[data-slot=toast-description]]:text-white/90 [&_[data-slot=toast-close]]:hover:bg-white/20 [&_[data-slot=toast-close]]:text-white font-medium"
     } else if (type === "warning") {
       variantStyles =
-        "bg-amber-500 text-slate-950 border-amber-500 shadow-xl shadow-amber-950/20 [&_[data-slot=toast-description]]:text-slate-900/90 [&_[data-slot=toast-close]]:text-slate-800 [&_[data-slot=toast-close]]:hover:text-slate-950 font-medium"
+        "bg-amber-500 text-slate-950 border-amber-500 shadow-xl shadow-amber-950/20 [&_[data-slot=toast-description]]:text-slate-900/90 [&_[data-slot=toast-close]]:hover:bg-black/10 [&_[data-slot=toast-close]]:text-slate-950 font-medium"
     } else if (type === "info") {
       variantStyles =
-        "bg-sky-600 text-white border-sky-600 shadow-xl shadow-sky-950/20 [&_[data-slot=toast-description]]:text-white/90 [&_[data-slot=toast-close]]:text-white/80 [&_[data-slot=toast-close]]:hover:text-white font-medium"
+        "bg-sky-600 text-white border-sky-600 shadow-xl shadow-sky-950/20 [&_[data-slot=toast-description]]:text-white/90 [&_[data-slot=toast-close]]:hover:bg-white/20 [&_[data-slot=toast-close]]:text-white font-medium"
     }
 
     return (
