@@ -30,8 +30,8 @@ const emptyMediaVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-transparent",
-        icon: "flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground [&_svg:not([class*='size-'])]:size-4",
+        default: "bg-transparent text-muted-foreground [&_svg:not([class*='size-'])]:size-8",
+        icon: "flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground [&_svg:not([class*='size-'])]:size-6",
       },
     },
     defaultVariants: {

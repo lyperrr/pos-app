@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { CardEmpty } from "@/components/ui/card-empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ViewToggle, type ViewMode } from "@/components/ui/view-toggle"
 import { showToast } from "@/components/ui/toast"
@@ -194,8 +194,8 @@ export default function ProductListPage() {
         selectedStatus === "available"
           ? "Tersedia"
           : selectedStatus === "low_stock"
-          ? "Stok Menipis"
-          : "Stok Habis"
+            ? "Stok Menipis"
+            : "Stok Habis"
       return `Cari di "${selectedCategory}" (${statusText})...`
     }
     if (hasCategory) {
@@ -206,8 +206,8 @@ export default function ProductListPage() {
         selectedStatus === "available"
           ? "Tersedia"
           : selectedStatus === "low_stock"
-          ? "Stok Menipis"
-          : "Stok Habis"
+            ? "Stok Menipis"
+            : "Stok Habis"
       return `Cari produk dengan status "${statusText}"...`
     }
     return "Cari produk berdasarkan nama, SKU, atau barcode..."
@@ -332,18 +332,12 @@ export default function ProductListPage() {
 
       {/* Empty State */}
       {!isLoading && filteredProducts.length === 0 && (
-        <Card className="border-dashed p-8">
-          {search || Boolean(selectedCategory && selectedCategory !== "all") || Boolean(selectedStatus && selectedStatus !== "all") ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <SearchX className="size-8 text-muted-foreground" />
-                </EmptyMedia>
-                <EmptyTitle>Produk Tidak Ditemukan</EmptyTitle>
-                <EmptyDescription>
-                  Tidak ada produk yang sesuai dengan pencarian atau filter yang Anda pilih. Coba sesuaikan kata kunci.
-                </EmptyDescription>
-              </EmptyHeader>
+        search || Boolean(selectedCategory && selectedCategory !== "all") || Boolean(selectedStatus && selectedStatus !== "all") ? (
+          <CardEmpty
+            icon={<SearchX />}
+            title="Produk Tidak Ditemukan"
+            description="Tidak ada produk yang sesuai dengan pencarian atau filter yang Anda pilih. Coba sesuaikan kata kunci."
+            action={
               <Button
                 variant="outline"
                 onClick={() => {
@@ -351,28 +345,23 @@ export default function ProductListPage() {
                   setSelectedCategory("")
                   setSelectedStatus("")
                 }}
-                className="mt-2"
               >
                 Reset Filter
               </Button>
-            </Empty>
-          ) : (
-            <Empty>
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <PackageX className="size-8 text-muted-foreground" />
-                </EmptyMedia>
-                <EmptyTitle>Katalog Produk Masih Kosong</EmptyTitle>
-                <EmptyDescription>
-                  Belum ada produk yang ditambahkan ke katalog toko Anda. Mulai tambahkan produk pertama Anda sekarang!
-                </EmptyDescription>
-              </EmptyHeader>
-              <Button onClick={() => navigate(ROUTES.ADD_PRODUCT)} className="mt-2 gap-2">
-                <Plus className="size-4" /> Tambah Produk Pertama
+            }
+          />
+        ) : (
+          <CardEmpty
+            icon={<PackageX />}
+            title="Katalog Produk Masih Kosong"
+            description="Belum ada produk yang ditambahkan ke katalog toko Anda. Mulai tambahkan produk pertama Anda sekarang!"
+            action={
+              <Button onClick={() => navigate(ROUTES.ADD_PRODUCT)}>
+                <Plus /> Tambah Produk
               </Button>
-            </Empty>
-          )}
-        </Card>
+            }
+          />
+        )
       )}
 
       {/* Main Content: GRID VIEW */}
@@ -387,7 +376,7 @@ export default function ProductListPage() {
             return (
               <Card
                 key={product.id}
-                className="group relative transition-all hover:shadow-md flex flex-col justify-between"
+                className="group relative transition-all hover:shadow-md flex flex-col justify-between border-red-500!"
               >
                 <CardContent className="p-4 space-y-3">
                   {/* Top Row: Avatar/Image & Action Dropdown */}
@@ -398,7 +387,7 @@ export default function ProductListPage() {
                         alt={product.name}
                         className="size-14 rounded-xl object-cover border bg-muted shrink-0"
                         onError={(e) => {
-                          ;(e.target as HTMLImageElement).src =
+                          ; (e.target as HTMLImageElement).src =
                             "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop"
                         }}
                       />
@@ -481,9 +470,8 @@ export default function ProductListPage() {
                       </p>
                       <Badge
                         variant={isOutOfStock ? "destructive" : isLowStock ? "outline" : "secondary"}
-                        className={`text-[10px] font-bold ${
-                          isLowStock ? "border-amber-500 text-amber-600 bg-amber-50" : ""
-                        }`}
+                        className={`text-[10px] font-bold ${isLowStock ? "border-amber-500 text-amber-600 bg-amber-50" : ""
+                          }`}
                       >
                         {isOutOfStock ? "Stok Habis" : isLowStock ? "Menipis" : "Tersedia"}
                       </Badge>
@@ -529,7 +517,7 @@ export default function ProductListPage() {
                             alt={product.name}
                             className="size-10 rounded-xl object-cover border bg-muted shrink-0"
                             onError={(e) => {
-                              ;(e.target as HTMLImageElement).src =
+                              ; (e.target as HTMLImageElement).src =
                                 "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop"
                             }}
                           />
@@ -573,9 +561,8 @@ export default function ProductListPage() {
                     <TableCell className="text-center">
                       <Badge
                         variant={isOutOfStock ? "destructive" : isLowStock ? "outline" : "secondary"}
-                        className={`text-[10px] font-bold ${
-                          isLowStock ? "border-amber-500 text-amber-600 bg-amber-50" : ""
-                        }`}
+                        className={`text-[10px] font-bold ${isLowStock ? "border-amber-500 text-amber-600 bg-amber-50" : ""
+                          }`}
                       >
                         {isOutOfStock ? "Stok Habis" : isLowStock ? "Menipis" : "Tersedia"}
                       </Badge>
